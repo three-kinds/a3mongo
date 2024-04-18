@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import math
 from typing import List, Iterable, Dict
-from pymongo.operations import ReplaceOne
+from pymongo.operations import ReplaceOne, UpdateOne
 from pymongo.collection import Collection
 from pymongo.database import Database
 from pymongo.cursor import Cursor
@@ -16,7 +16,10 @@ class MongoTable:
     db_conf_name: str = None
 
     def __init__(self, db: Database = None, table_name: str = None):
-        self.db = db or MongoClientFactory.get_db(self.db_conf_name)
+        if db is None:
+            db = MongoClientFactory.get_db(self.db_conf_name)
+
+        self.db = db
         self.table_name = table_name or self.table_name
         self._table = self.db.get_collection(self.table_name)
 
@@ -75,6 +78,7 @@ class MongoTable:
         except WriteError as e:
             return False, str(e)
 
+    # insert or update
     def upsert_many(self, entry_list: list, unique_field: str = None) -> (int, BulkWriteResult):
         unique_field = unique_field or '_id'
         request_list = list()
@@ -82,6 +86,36 @@ class MongoTable:
         for entry in entry_list:
             request_list.append(
                 ReplaceOne({unique_field: entry[unique_field]}, entry, upsert=True)
+            )
+
+        error_count = 0
+        while True:
+            try:
+                write_result = self._table.bulk_write(request_list)
+                return error_count, write_result
+            except BulkWriteError as e:
+                error_index_list = list()
+                for error in e.details['writeErrors']:
+                    error_index_list.append(error['index'])
+
+                error_count += len(error_index_list)
+                for index in sorted(error_index_list, reverse=True):
+                    del request_list[index]
+
+    # only insert not update
+    def insert_many(self, entry_list: list, unique_field: str = None) -> (int, BulkWriteResult):
+        unique_field = unique_field or '_id'
+        request_list = list()
+
+        for entry in entry_list:
+            request_list.append(
+                UpdateOne(
+                    {unique_field: entry[unique_field]},
+                    {
+                        "$setOnInsert": entry
+                    },
+                    upsert=True
+                )
             )
 
         error_count = 0

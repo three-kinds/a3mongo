@@ -1,5 +1,9 @@
 # History
 
+## 0.1.2
+
+* add MongoTable.insert_many
+
 ## 0.1.1
 
 * update MongoClientFactory.init_mongo_clients
