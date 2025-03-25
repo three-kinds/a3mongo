@@ -2,4 +2,6 @@
 from a3mongo.mongo_client_factory import MongoClientFactory
 from a3mongo.mongo_table import MongoTable
 
+__all__ = ["MongoClientFactory", "MongoTable"]
+
 __version__ = "0.3.0"

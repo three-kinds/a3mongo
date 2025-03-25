@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import math
-from typing import List, Iterable, Dict
+from typing import List, Iterable, Dict, Any, Tuple
 from pymongo.operations import ReplaceOne, UpdateOne
 from pymongo.collection import Collection
 from pymongo.database import Database
@@ -12,15 +12,17 @@ from .mongo_client_factory import MongoClientFactory
 
 
 class MongoTable:
-    table_name: str = None
-    db_conf_name: str = None
+    table_name: str
+    db_conf_name: str | None = None
 
-    def __init__(self, db: Database = None, table_name: str = None):
+    def __init__(self, db: Database | None = None, table_name: str | None = None):
         if db is None:
             db = MongoClientFactory.get_db(self.db_conf_name)
 
         self.db = db
-        self.table_name = table_name or self.table_name
+        table_name = table_name or getattr(self, "table_name", None)
+        assert isinstance(table_name, str)
+        self.table_name = table_name
         self._table = self.db.get_collection(self.table_name)
 
     def get_raw_collection(self) -> Collection:
@@ -37,16 +39,22 @@ class MongoTable:
             self._table.drop()
             self._table = None
 
-    def count(self, filter_dict: dict = None) -> int:
+    def count(self, filter_dict: dict | None = None) -> int:
         if filter_dict is None:
             filter_dict = dict()
         return self._table.count_documents(filter_dict)
 
-    def find_one(self, filter_dict: dict = None) -> dict:
+    def find_one(self, filter_dict: dict | None = None) -> dict | None:
         return self._table.find_one(filter_dict)
 
-    def find(self, filter_dict: dict = None, sort_list: list = None, offset: int = None, limit: int = None) -> Cursor:
-        params = dict()
+    def find(
+        self,
+        filter_dict: dict | None = None,
+        sort_list: list | None = None,
+        offset: int | None = None,
+        limit: int | None = None,
+    ) -> Cursor:
+        params: Dict[str, Any] = dict()
         if filter_dict is not None:
             params["filter"] = filter_dict
 
@@ -61,9 +69,9 @@ class MongoTable:
         return self._table.find(**params)
 
     def find_with_pagination(
-        self, filter_dict: dict = None, sort_list: list = None, page_size: int = 10000
+        self, filter_dict: dict | None = None, sort_list: list | None = None, page_size: int = 10000
     ) -> Iterable[Dict]:
-        total_count = self._table.count_documents(filter=filter_dict)
+        total_count = self._table.count_documents(filter=filter_dict or dict())
         total_times = math.ceil(total_count / page_size)
 
         for i in range(total_times):
@@ -72,7 +80,7 @@ class MongoTable:
             for entry in cursor:
                 yield entry
 
-    def upsert_one(self, entry: dict, unique_field: str = None) -> (bool, UpdateResult | str):
+    def upsert_one(self, entry: dict, unique_field: str | None = None) -> Tuple[bool, UpdateResult | str]:
         unique_field = unique_field or "_id"
         try:
             update_result = self._table.replace_one({unique_field: entry[unique_field]}, entry, upsert=True)
@@ -81,9 +89,9 @@ class MongoTable:
             return False, str(e)
 
     # insert or update
-    def upsert_many(self, entry_list: list, unique_field: str = None) -> (int, BulkWriteResult):
+    def upsert_many(self, entry_list: list, unique_field: str | None = None) -> Tuple[int, BulkWriteResult]:
         unique_field = unique_field or "_id"
-        request_list = list()
+        request_list: List[ReplaceOne] = list()
 
         for entry in entry_list:
             request_list.append(ReplaceOne({unique_field: entry[unique_field]}, entry, upsert=True))
@@ -103,7 +111,7 @@ class MongoTable:
                     del request_list[index]
 
     # only insert not update
-    def insert_many(self, entry_list: list, unique_field: str = None) -> (int, BulkWriteResult):
+    def insert_many(self, entry_list: list, unique_field: str | None = None) -> Tuple[int, BulkWriteResult]:
         unique_field = unique_field or "_id"
         request_list = list()
 

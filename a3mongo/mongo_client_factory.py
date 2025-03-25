@@ -13,14 +13,14 @@ class MongoClientFactory:
     @classmethod
     def init_mongo_clients(cls, conf: dict):
         for name, cf in conf.items():
-            client = MongoClient(**cf)
+            client: MongoClient = MongoClient(**cf)
             db = client[cf["authSource"]]
 
             cls._name2conf[name] = cf
             cls._name2db[name] = db
 
     @classmethod
-    def get_db(cls, name: str = None):
+    def get_db(cls, name: str | None = None):
         if name is None:
             name = DEFAULT_NAME
 
