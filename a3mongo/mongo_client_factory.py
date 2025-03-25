@@ -3,7 +3,7 @@ from typing import Dict
 from pymongo import MongoClient
 from pymongo.database import Database
 
-DEFAULT_NAME = 'default'
+DEFAULT_NAME = "default"
 
 
 class MongoClientFactory:
@@ -14,7 +14,7 @@ class MongoClientFactory:
     def init_mongo_clients(cls, conf: dict):
         for name, cf in conf.items():
             client = MongoClient(**cf)
-            db = client[cf['authSource']]
+            db = client[cf["authSource"]]
 
             cls._name2conf[name] = cf
             cls._name2db[name] = db
