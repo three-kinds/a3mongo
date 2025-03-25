@@ -1,0 +1,71 @@
+[build-system]
+requires = ["setuptools>=61.0.0,<69.3.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "a3mongo"
+dynamic = ["version"]
+requires-python = ">= 3.10"
+dependencies = [
+    "pymongo",
+]
+authors = [
+  {name = "three-kinds", email = "3179158552@qq.com"},
+]
+description = "a3mongo is a simple wrapper around pymongo to make it easier to use."
+readme = "README.md"
+license = {text = "MIT"}
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+
+[project.urls]
+Homepage = "https://github.com/three-kinds/a3mongo"
+Source = "https://github.com/three-kinds/a3mongo"
+
+[tool.setuptools.dynamic]
+version = {attr = "a3mongo.__version__"}
+
+[tool.setuptools.packages.find]
+include = ["a3mongo*"]
+
+[tool.coverage.run]
+source = ["a3mongo"]
+parallel = false
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "raise NotImplementedError",
+    "raise AssertionError",
+    "if TYPE_CHECKING:",
+    "pass"
+]
+
+[tool.mypy]
+packages = [
+    "a3mongo",
+    "tests"
+]
+disable_error_code = [
+    "import-untyped",
+    "method-assign",
+]
+
+[tool.ruff]
+src = [
+    "a3mongo",
+    "tests"
+]
+line-length = 120

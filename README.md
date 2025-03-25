@@ -1,8 +1,6 @@
 # a3mongo
 
-It is just a thin wrapper of pymongo.
-
-[History.](HISTORY.md)
+`a3mongo` is a simple wrapper around `pymongo` to make it easier to use.
 
 ## Install
 
