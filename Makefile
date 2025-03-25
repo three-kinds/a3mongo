@@ -5,7 +5,7 @@ init:
 coverage:
 	coverage erase
 	coverage run -m unittest discover
-	coverage html coverage report"
+	coverage html
 	python -m webbrowser ./htmlcov/index.html
 
 test:
