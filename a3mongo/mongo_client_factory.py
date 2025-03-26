@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from typing import Dict
+from typing import Dict, List
 from pymongo import MongoClient
 from pymongo.database import Database
 
@@ -7,6 +7,7 @@ DEFAULT_NAME = "default"
 
 
 class MongoClientFactory:
+    _client_list: List[MongoClient] = list()
     _name2conf: Dict[str, Dict] = dict()
     _name2db: Dict[str, Database] = dict()
 
@@ -16,11 +17,12 @@ class MongoClientFactory:
             client: MongoClient = MongoClient(**cf)
             db = client[cf["authSource"]]
 
+            cls._client_list.append(client)
             cls._name2conf[name] = cf
             cls._name2db[name] = db
 
     @classmethod
-    def get_db(cls, name: str | None = None):
+    def get_db(cls, name: str | None = None) -> Database:
         if name is None:
             name = DEFAULT_NAME
 
@@ -29,3 +31,12 @@ class MongoClientFactory:
             raise AssertionError(f"Invalid mongo client [{name}]")
 
         return db
+
+    @classmethod
+    def close_all_clients(cls):
+        for client in cls._client_list:
+            client.close()
+
+        cls._client_list = list()
+        cls._name2conf = dict()
+        cls._name2db = dict()
