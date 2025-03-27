@@ -1,24 +1,24 @@
 # a3mongo
 
-English | [简体中文](README_ZH.md)
+[English](README.md) | 简体中文
 
-`a3mongo` is a simple wrapper around `pymongo` to make it easier to use.
+`a3mongo` 对 `pymongo` 做了简单的封装，目的是用起来更简单。
 
-## 1. Introduction
+## 1. 简介
 
-* Multiple MongoDB services can be configured at the same time.
-* Some commonly used methods have been encapsulated.
+* 可以同时配置多个 mongodb 服务
+* 封装了一些常用的方法
 
-## 2. Usage
+## 2. 使用
 
-### Install
+### 安装
 
 ```shell
 pip install a3mongo
 
 ```
 
-### Examples
+### 样例
 
 ```python
 CONF = {
