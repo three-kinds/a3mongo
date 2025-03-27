@@ -1,3 +1,4 @@
 graft a3mongo
+prune tests
 global-exclude __pycache__
 global-exclude *.py[co]
